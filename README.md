@@ -23,6 +23,9 @@ Authenticated users can chat live using WebSockets.
 Admins can monitor, control, and terminate active sessions.
 ![Admin Dashboard](./p4.PNG)
 
+### 👥 Manage Users Page
+Admins can create new users, promote them to admin, or view existing users.  
+![Manage Users](./p5.PNG)
 ---
 
 ## 🧩 Key Features
