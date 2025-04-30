@@ -1,0 +1,85 @@
+{# templates/success.html #}
+{% extends "base.html" %}
+
+{% block title %}Connected - Network Authentication Portal{% endblock %}
+
+{% block content %}
+    <div class="success-message">
+        <h2>Successfully Authenticated!</h2>
+        <p>Your device is now authorized for network access.</p>
+
+        <div class="connection-info">
+            <p><strong>Username:</strong> {{ current_user.username }}</p>
+            <p><strong>IP Address:</strong> {{ session.ip_address }}</p>
+            {% if session.mac_address %}
+            <p><strong>MAC Address:</strong> {{ session.mac_address }}</p>
+            {% endif %}
+            <p><strong>Connected Since:</strong> {{ session.start_time.strftime('%Y-%m-%d %H:%M:%S UTC') }}</p>
+            {# Calculate remaining time based on expiration_time passed from the route #}
+            {% if expiration_time %}
+                {% set remaining_seconds = (expiration_time - now).total_seconds() %}
+                {% if remaining_seconds > 0 %}
+                    <p><strong>Session Expires in:</strong> <span id="remaining-time">{{ (remaining_seconds / 60)|int }}</span> minutes</p>
+                {% else %}
+                    <p><strong>Session Expires in:</strong> <span id="remaining-time">Expired</span></p>
+                {% endif %}
+            {% else %}
+                 <p><strong>Session Timeout:</strong> Check configuration.</p>
+            {% endif %}
+
+        </div>
+
+        <div class="action-buttons">
+            {# Link to the Chat Page #}
+            <a href="{{ url_for('chat') }}" class="btn btn-primary">Enter Portal Chat</a>
+
+            {# Link to Admin Dashboard if user is admin #}
+            {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">Admin Dashboard</a>
+            {% endif %}
+
+             {# Logout Button #}
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update remaining time dynamically and maybe prompt before expiration
+    const timeElement = document.getElementById('remaining-time');
+    const logoutUrl = "{{ url_for('logout') }}";
+    let remainingSeconds = {{ remaining_seconds|default(-1)|int }}; // Get seconds from template
+
+    function formatTime(totalSeconds) {
+        if (totalSeconds <= 0) return "Expired";
+        const minutes = Math.max(0, Math.floor(totalSeconds / 60)); // Ensure non-negative
+        // const seconds = Math.max(0, totalSeconds % 60);
+        // return `${minutes}m ${seconds < 10 ? '0' : ''}${seconds}s`;
+        return `${minutes} minutes`;
+    }
+
+    function updateRemainingTime() {
+        if (remainingSeconds <= 0) {
+            if (timeElement) timeElement.textContent = "Expired";
+            // Optional: Redirect after a short delay if expired
+            // setTimeout(() => { window.location.href = logoutUrl; }, 5000);
+            clearInterval(timerInterval); // Stop the timer
+            return;
+        }
+
+        if (timeElement) timeElement.textContent = formatTime(remainingSeconds);
+        remainingSeconds--;
+    }
+
+    if (remainingSeconds > 0 && timeElement) {
+        // Initial display
+        updateRemainingTime();
+        // Update every second
+        var timerInterval = setInterval(updateRemainingTime, 1000);
+    } else if (timeElement) {
+         timeElement.textContent = "Expired";
+    }
+
+</script>
+{% endblock %}

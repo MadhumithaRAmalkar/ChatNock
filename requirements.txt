@@ -1,0 +1,12 @@
+flask
+flask-sqlalchemy
+flask-login
+werkzeug
+flask-wtf
+python-dotenv
+#pynetfilter_conntrack  # For network connection tracking
+matplotlib
+       # For analFlask-SocketIO==5.3.6  # Or the latest compatible version
+#eventlet==0.33.3
+setuptools>=65.5.1
+ gevent # Or a recent version# Or the latest compatible versionytics graphs

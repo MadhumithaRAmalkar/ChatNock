@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Network Authentication Portal{% endblock %}
+
+{% block content %}
+<div class="admin-users">
+    <h2>Manage Users</h2>
+
+    <div class="admin-nav">
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link">Dashboard</a>
+        <a href="{{ url_for('admin.admin_users') }}" class="nav-link active">Users</a>
+        <a href="{{ url_for('index') }}" class="nav-link">Portal Home</a>
+        <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+    </div>
+
+    <!-- Add New User Form -->
+    <div class="add-user-form card mb-4">
+        <h3>Add New User</h3>
+        <form id="addUserForm">
+            <div class="form-group">
+                <label for="newUsername">Username:</label>
+                <input type="text" id="newUsername" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">Password:</label>
+                <input type="password" id="newPassword" name="password" required>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="isAdmin" name="is_admin">
+                <label for="isAdmin">Make Admin</label>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add User</button>
+            </div>
+            <div id="addUserMessage" class="form-message mt-2"></div>
+        </form>
+    </div>
+
+    <!-- User List -->
+    <div class="user-list card">
+        <h3>Existing Users</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Admin</th>
+                    <th>Created (UTC)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userListBody">
+                {% for user in users %}
+                <tr id="user-row-{{ user.id }}">
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>
+                        {% if user.id != current_user.id %} {# Prevent deleting self #}
+                            <button class="btn btn-danger btn-sm delete-user"
+                                    data-user-id="{{ user.id }}"
+                                    data-username="{{ user.username }}">Delete</button>
+                        {% else %}
+                            (Current User)
+                        {% endif %}
+                        <!-- Add Edit button later if needed -->
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div id="deleteUserMessage" class="form-message mt-2"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Handle Add User Form Submission
+    const addUserForm = document.getElementById('addUserForm');
+    const addUserMessage = document.getElementById('addUserMessage');
+
+    addUserForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        addUserMessage.textContent = '';
+        addUserMessage.className = 'form-message mt-2'; // Reset classes
+        const submitButton = addUserForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Adding...';
+
+        const formData = new FormData(addUserForm);
+        const data = {
+            username: formData.get('username'),
+            password: formData.get('password'),
+            is_admin: formData.get('is_admin') === 'on' // Convert checkbox value
+        };
+
+        try {
+            const response = await fetch("{{ url_for('admin.admin_create_user') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                    // Add CSRF token header if needed
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                addUserMessage.textContent = `User "${result.user.username}" created successfully!`;
+                addUserMessage.classList.add('text-success');
+                addUserForm.reset(); // Clear the form
+                // Optionally, add the new user to the table dynamically or just prompt reload
+                // For simplicity, let's suggest a reload or manual refresh for now.
+                // location.reload(); // Or add row dynamically
+                 alert('User created successfully. Refreshing user list...');
+                 location.reload(); // Simple way to update the list
+            } else {
+                addUserMessage.textContent = `Error: ${result.error || 'Failed to create user.'}`;
+                addUserMessage.classList.add('text-danger');
+            }
+        } catch (error) {
+            console.error("Add user error:", error);
+            addUserMessage.textContent = 'An unexpected error occurred.';
+            addUserMessage.classList.add('text-danger');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Add User';
+        }
+    });
+
+    // Handle Delete User Button Click
+    const userListBody = document.getElementById('userListBody');
+    const deleteUserMessage = document.getElementById('deleteUserMessage');
+
+    userListBody.addEventListener('click', async function(event) {
+        if (event.target.classList.contains('delete-user')) {
+            const button = event.target;
+            const userId = button.getAttribute('data-user-id');
+            const username = button.getAttribute('data-username');
+            deleteUserMessage.textContent = ''; // Clear previous messages
+
+            if (confirm(`Are you sure you want to delete user "${username}" (ID: ${userId})? This cannot be undone.`)) {
+                button.disabled = true;
+                button.textContent = 'Deleting...';
+
+                try {
+                    const response = await fetch(`/admin/users/delete/${userId}`, {
+                        method: 'POST', // Using POST for deletion action
+                        headers: {
+                             'Content-Type': 'application/json',
+                             'Accept': 'application/json'
+                             // Add CSRF token header if needed
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        // Remove the user row from the table
+                        const row = document.getElementById(`user-row-${userId}`);
+                        if (row) {
+                            row.remove();
+                        }
+                        deleteUserMessage.textContent = `User "${username}" deleted successfully.`;
+                        deleteUserMessage.className = 'form-message mt-2 text-success';
+                    } else {
+                         deleteUserMessage.textContent = `Error: ${result.error || 'Failed to delete user.'}`;
+                         deleteUserMessage.className = 'form-message mt-2 text-danger';
+                         button.disabled = false;
+                         button.textContent = 'Delete';
+                    }
+                } catch (error) {
+                    console.error("Delete user error:", error);
+                    deleteUserMessage.textContent = 'An unexpected error occurred during deletion.';
+                    deleteUserMessage.className = 'form-message mt-2 text-danger';
+                    button.disabled = false;
+                    button.textContent = 'Delete';
+                }
+            }
+        }
+    });
+
+</script>
+{% endblock %}

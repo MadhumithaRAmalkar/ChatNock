@@ -1,0 +1,442 @@
+/* Main styles for Network Authentication Portal */
+
+/* Base styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa; /* Lighter grey */
+    padding-top: 20px; /* Add some space at the top */
+}
+
+.container {
+    width: 100%;
+    max-width: 1140px; /* Standard bootstrap max-width */
+    margin: 0 auto;
+    padding: 15px;
+}
+
+/* Header */
+header {
+    background-color: #007bff; /* Primary blue */
+    color: white;
+    padding: 1rem 1.5rem;
+    margin-bottom: 30px;
+    border-radius: 0.3rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.75rem; /* Slightly larger */
+    font-weight: 500;
+}
+
+/* Flash messages */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.flash-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.flash-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.flash-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.flash-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+/* Cards */
+.card {
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.3rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem; /* Use mb-4 class */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+
+/* Login form & General Forms */
+.login-form, .add-user-form {
+    background-color: white;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 450px; /* Slightly wider */
+    margin: 30px auto;
+}
+
+.login-form h2, .add-user-form h3 {
+    margin-bottom: 25px;
+    text-align: center;
+    color: #007bff;
+    font-weight: 500;
+}
+
+.form-group {
+    margin-bottom: 1.25rem; /* More space */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="email"], /* Add other input types */
+.form-group select {
+    width: 100%;
+    padding: 0.6rem 0.75rem; /* Adjust padding */
+    border: 1px solid #ced4da; /* Standard input border */
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-group input:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-group input[type="checkbox"] {
+    margin-right: 0.5rem;
+    width: auto; /* Checkboxes shouldn't be full width */
+}
+
+.form-group.remember-me label {
+    display: inline-block; /* Align label next to checkbox */
+    font-weight: normal;
+}
+
+.form-actions {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+/* Form Messages (e.g., for AJAX responses) */
+.form-message {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+.text-success { color: #28a745; }
+.text-danger { color: #dc3545; }
+.mt-2 { margin-top: 0.5rem !important; }
+
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    color: #212529;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem; /* Adjusted padding */
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    color: #fff;
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    color: #fff;
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+.btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Success page */
+.success-message {
+    background-color: white;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 30px auto;
+    text-align: center;
+}
+
+.success-message h2 {
+    color: #28a745; /* Success green */
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.connection-info {
+    margin: 25px 0;
+    text-align: left;
+    background-color: #f8f9fa; /* Light background */
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #e9ecef; /* Subtle border */
+}
+.connection-info p {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+.connection-info strong {
+     min-width: 120px; /* Align keys */
+     display: inline-block;
+}
+.connection-info #remaining-time {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.action-buttons {
+    margin-top: 30px;
+}
+
+.action-buttons .btn {
+    margin: 0 10px;
+}
+
+/* Admin Dashboard & Pages */
+.admin-dashboard, .admin-users {
+    /* Using .card styling implicitly via structure */
+}
+
+.admin-dashboard h2, .admin-users h2 {
+    margin-bottom: 25px;
+    color: #007bff;
+    font-weight: 500;
+    text-align: center;
+}
+
+.admin-nav {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6; /* Standard border color */
+}
+
+.admin-nav .nav-link {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #007bff; /* Link color */
+    margin-right: 10px; /* Space between links */
+    margin-bottom: 5px; /* Space if wrapped */
+    border-radius: 0.25rem;
+}
+
+.admin-nav .nav-link:hover {
+    background-color: #e9ecef;
+    color: #0056b3;
+}
+
+.admin-nav .nav-link.active {
+    color: #495057; /* Darker grey for active */
+    background-color: #e9ecef;
+    font-weight: 500;
+}
+
+.dashboard-stats {
+    display: grid; /* Use grid for responsiveness */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Responsive columns */
+    gap: 20px; /* Space between cards */
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.stat-card h3 {
+    font-size: 0.95rem;
+    color: #6c757d; /* Muted text color */
+    margin-bottom: 10px;
+    font-weight: 500;
+    border-bottom: none; /* Remove border inside card */
+    padding-bottom: 0;
+}
+
+.stat-number {
+    font-size: 2.5rem; /* Larger number */
+    font-weight: 500; /* Bold */
+    color: #007bff;
+    margin: 0; /* Remove default margin */
+}
+
+.session-list, .user-list {
+     margin-bottom: 30px;
+     /* Using .card styling via structure */
+}
+
+/* Data Tables */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    background-color: #fff;
+}
+
+.data-table th, .data-table td {
+    padding: 10px 12px; /* Slightly less padding */
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle; /* Align content vertically */
+}
+
+.data-table thead th {
+    background-color: #f8f9fa; /* Very light grey header */
+    font-weight: 600; /* Bolder headers */
+    color: #495057;
+    border-top: 1px solid #dee2e6;
+    border-bottom-width: 2px; /* Thicker bottom border for header */
+}
+
+.data-table tbody tr:hover {
+    background-color: #f1f1f1; /* Subtle hover effect */
+}
+
+.data-table tr:last-child td {
+    /* border-bottom: none; */ /* Keep border for consistency */
+}
+.data-table .text-center { text-align: center; }
+
+.data-table .btn-sm { margin-right: 5px; }
+
+/* Status indicators */
+.status-active { color: #28a745; font-weight: bold; }
+.status-inactive { color: #6c757d; }
+.status-unknown { color: #ffc107; }
+
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+    color: #6c757d; /* Muted color */
+    font-size: 0.85rem;
+}
+
+/* Utility classes */
+.mb-4 { margin-bottom: 1.5rem !important; } /* Bootstrap-like margin */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    .stat-number {
+        font-size: 2rem;
+    }
+    .data-table th, .data-table td {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+    .admin-nav {
+        justify-content: center; /* Center nav links on small screens */
+    }
+     .login-form {
+         max-width: 90%;
+         padding: 20px;
+     }
+}
+
+@media (max-width: 576px) {
+    header h1 { font-size: 1.5rem; }
+    .data-table { display: block; overflow-x: auto; white-space: nowrap; } /* Make table scrollable */
+}

@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Network Authentication Portal{% endblock %}
+
+{% block content %}
+    <div class="admin-dashboard">
+        <h2>Admin Dashboard</h2>
+
+        <div class="admin-nav">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link active">Dashboard</a>
+            <a href="{{ url_for('admin.admin_users') }}" class="nav-link">Users</a>
+            <a href="{{ url_for('index') }}" class="nav-link">Portal Home</a>
+            <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <h3>Active Sessions</h3>
+                <p class="stat-number">{{ active_sessions|length }}</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <p class="stat-number">{{ user_count }}</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Recent Sessions (24h)</h3>
+                <p class="stat-number">{{ recent_sessions|length }}</p>
+            </div>
+        </div>
+
+        <div class="session-list active-sessions">
+            <h3>Active Sessions</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>IP Address</th>
+                        <th>MAC Address</th>
+                        <th>Started (UTC)</th>
+                        <th>Duration</th>
+                        <th>Device Info</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in active_sessions %}
+                    <tr id="session-row-{{ session.id }}">
+                        <td>{{ session.user.username }} {% if session.user.is_admin %}(Admin){% endif %}</td>
+                        <td>{{ session.ip_address }}</td>
+                        <td>{{ session.mac_address if session.mac_address else 'N/A' }}</td>
+                        <td>{{ session.start_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ ((now - session.start_time).total_seconds() / 60)|int }} min</td>
+                        <td title="{{ session.device_name }}">{{ session.device_name[:40] if session.device_name else 'N/A' }}{% if session.device_name and session.device_name|length > 40 %}...{% endif %}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm terminate-session"
+                                    data-session-id="{{ session.id }}"
+                                    data-user="{{ session.user.username }}"
+                                    data-ip="{{ session.ip_address }}">Terminate</button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No active sessions</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="session-list recent-sessions">
+            <h3>Recent Sessions (Last 24 Hours)</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>IP Address</th>
+                        <th>Started (UTC)</th>
+                        <th>Ended (UTC)</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in recent_sessions %}
+                    <tr>
+                        <td>{{ session.user.username }}</td>
+                        <td>{{ session.ip_address }}</td>
+                        <td>{{ session.start_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            {% if session.end_time %}
+                                {{ session.end_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.end_time %}
+                                {{ ((session.end_time - session.start_time).total_seconds() / 60)|int }} min
+                            {% else %}
+                                {{ ((now - session.start_time).total_seconds() / 60)|int }} min
+                            {% endif %}
+                        </td>
+                         <td>
+                            {% if session.active %}
+                                <span class="status-active">Active</span>
+                            {% elif session.end_time %}
+                                <span class="status-inactive">Ended</span>
+                            {% else %}
+                                <span class="status-unknown">Unknown</span>
+                            {% endif %}
+                         </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No recent sessions</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Handle session termination via API call
+    document.querySelectorAll('.terminate-session').forEach(button => {
+        button.addEventListener('click', async function(event) {
+            event.preventDefault(); // Stop default button behavior
+            const buttonElement = this;
+            const sessionId = buttonElement.getAttribute('data-session-id');
+            const userName = buttonElement.getAttribute('data-user');
+            const userIp = buttonElement.getAttribute('data-ip');
+
+            if (confirm(`Are you sure you want to terminate the session for ${userName} (${userIp})?`)) {
+                buttonElement.disabled = true; // Prevent double clicks
+                buttonElement.textContent = 'Terminating...';
+
+                try {
+                    const response = await fetch(`/admin/sessions/terminate/${sessionId}`, {
+                        method: 'POST',
+                        headers: {
+                            // If using CSRF protection, add the token header here
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json(); // Try to parse JSON regardless of status
+
+                    if (response.ok && data.success) {
+                        // Success: Remove row or update UI
+                        alert('Session terminated successfully.');
+                        // Option 1: Reload the page
+                        // location.reload();
+                        // Option 2: Remove the table row dynamically
+                         const row = document.getElementById(`session-row-${sessionId}`);
+                         if (row) {
+                             row.style.opacity = '0.5'; // Fade out effect
+                             setTimeout(() => row.remove(), 500);
+                         } else {
+                             location.reload(); // Fallback to reload if row removal fails
+                         }
+                        // You might need to update the active session count too
+                    } else {
+                        // Handle errors reported by the server
+                        alert(`Error: ${data.error || 'Failed to terminate session. Status: ' + response.status}`);
+                        buttonElement.disabled = false;
+                        buttonElement.textContent = 'Terminate';
+                    }
+                } catch (error) {
+                    // Handle network errors or failed fetch
+                    console.error('Termination request failed:', error);
+                    alert('An error occurred while trying to terminate the session.');
+                    buttonElement.disabled = false;
+                    buttonElement.textContent = 'Terminate';
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
